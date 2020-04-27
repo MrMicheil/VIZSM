@@ -75,3 +75,32 @@ class MonoOdometry(object):
         return realne_suradnice.flatten()
 
 
+    def odometria(self):
+
+        if self.n_features < 2000:                          #
+            self.p0 = self.detect(self.old_frame)
+
+        self.p1, st, err = cv2.calcOpticalFlowPyrLK(self.old_frame, self.current_frame, self.p0, None, **self.lk_params)
+        
+        # Save the good points from the optical flow
+        self.good_old = self.p0[st == 1]
+        self.good_new = self.p1[st == 1]
+
+
+        if self.id < 2:
+            E, _ = cv2.findEssentialMat(self.good_new, self.good_old, self.focal, self.pp, cv2.RANSAC, 0.999, 1.0, None)
+            _, self.R, self.t, _ = cv2.recoverPose(E, self.good_old, self.good_new, self.R, self.t, self.focal, self.pp, None)
+        else:
+            E, _ = cv2.findEssentialMat(self.good_new, self.good_old, self.focal, self.pp, cv2.RANSAC, 0.999, 1.0, None)
+            _, R, t, _ = cv2.recoverPose(E, self.good_old, self.good_new, self.R.copy(), self.t.copy(), self.focal, self.pp, None)
+
+            absolute_scale = self.get_absolute_scale()              #read document
+            if (absolute_scale > 0.1):                              #Ak som nemal dataset dal som tam len absolute_scale = 0.2 Je to udaj napr. o rychlosti kamery
+                self.t = self.t + absolute_scale * self.R.dot(t)    
+                self.R = R.dot(self.R)
+
+        self.n_features = self.good_new.shape[0]
+        # Save good points
+
+
+
