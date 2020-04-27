@@ -1,7 +1,7 @@
 import numpy as np
 import cv2 as cv
 import matplotlib.pyplot as plt
-from monoodometery import MonoOdometery
+from monoodometry import MonoOdometry
 import os
 
 
@@ -36,7 +36,7 @@ lk_params = dict( winSize  = (21,21),
 #         - epsilon (0.03 above). More iterations means a more exhaustive search, and a smaller 
 #        epsilon finishes earlier. These are primarily useful in exchanging speed vs accuracy, but mainly stay the same.
 
-Odometry = MonoVideoOdometery(img_path, pose_path, focal, pp, lk_params)
+Odometry = MonoOdometry(img_path, pose_path, focal, pp, lk_params)
 Cesta = np.zeros(shape=(600, 800, 3))
 
 while(Odometry.dalsiSnimok()):
@@ -49,20 +49,20 @@ while(Odometry.dalsiSnimok()):
         break
 
 
-    Odometry.process_frame()
+    Odometry.zmenaSnimku()
 
-    VyratSur = Odometry.get_mono_coordinates()
-    RealneSur = Odometry.get_true_coordinates()
+    VyratSur = Odometry.vyrataj_suradnice()
+    RealneSur = Odometry.vyrataj_realne_suradnice()
 
     print("Chyba: ", np.linalg.norm(VyratSur - RealneSur))
     print("x: {}, y: {}, z: {}".format(*[str(pt) for pt in VyratSur]))
     print("Realne_x: {}, Realne_y: {}, Realne_z: {}".format(*[str(pt) for pt in RealneSur]))
-
+ 
     x, y, z = [int(round(x)) for x in VyratSur]
-    Cesta = cv.circle(Cesta, (x + 400, z + 100), 1, list((0, 0, 255)), 4)
+    Cesta = cv.circle(Cesta, (x * 4 + 400, z * 4 + 100), 1, list((0, 0, 255)), 4)
     
     x, y, z = [int(round(x)) for x in RealneSur]
-    Cesta = cv.circle(Cesta, (x + 400, z + 100), 1, list((0, 255, 0)), 4)
+    Cesta = cv.circle(Cesta, (x * 4 + 400, z * 4 + 100), 1, list((0, 255, 0)), 4)
 
     cv.imshow('Trajektoria', Cesta)
 
