@@ -23,3 +23,15 @@ pose_path = 'C:\\data_odometry_poses\\dataset\\poses\\00.txt'
 
 focal = 187.5
 pp = (600, 190)
+
+
+# Parameters for lucas kanade optical flow
+lk_params = dict( winSize  = (21,21),
+                  criteria = (cv.TERM_CRITERIA_EPS | cv.TERM_CRITERIA_COUNT, 30, 0.01))
+
+#wimSize  This determines the integration window size. Small windows are more sensitive to noise 
+#         and may miss larger motions. Large windows will “survive” an occlusion.
+#criteria criteria has two interesting parameters here - 
+#         - the max number (10 above) of iterations and 
+#         - epsilon (0.03 above). More iterations means a more exhaustive search, and a smaller 
+#        epsilon finishes earlier. These are primarily useful in exchanging speed vs accuracy, but mainly stay the same.
