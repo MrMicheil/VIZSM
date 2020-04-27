@@ -33,7 +33,20 @@ class MonoOdometry(object):
     def dalsiSnimok(self):
          return self.id < len(os.listdir(self.file_path)) 
         #    bool -- Boolean value denoting whether there are still frames in the folder to process
-    
+
+    def zmenaSnimku(self):
+
+        if self.id < 2:
+            self.old_frame = cv2.imread(self.file_path +str().zfill(6)+'.png', 0)
+            self.current_frame = cv2.imread(self.file_path + str(1).zfill(6)+'.png', 0)
+            self.odometria()
+            self.id = 2
+        else:
+            self.old_frame = self.current_frame
+            self.current_frame = cv2.imread(self.file_path + str(self.id).zfill(6)+'.png', 0)
+            self.odometria()
+            self.id += 1
+
     def detect(self, img):   
 
         p0 = self.detector.detect(img) 
