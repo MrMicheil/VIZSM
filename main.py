@@ -35,3 +35,34 @@ lk_params = dict( winSize  = (21,21),
 #         - the max number (10 above) of iterations and 
 #         - epsilon (0.03 above). More iterations means a more exhaustive search, and a smaller 
 #        epsilon finishes earlier. These are primarily useful in exchanging speed vs accuracy, but mainly stay the same.
+
+Odometry = MonoVideoOdometery(img_path, pose_path, focal, pp, lk_params)
+Cesta = np.zeros(shape=(600, 800, 3))
+
+while(Odometry.hasNextFrame()):
+
+    Snimka = Odometry.current_frame
+
+    cv.imshow('Zaznam', Snimka)
+    k = cv.waitKey(1)
+    if k == 27:
+        break
+
+    Odometry.process_frame()
+
+    VyratSur = Odometry.get_mono_coordinates()
+    RealneSur = Odometry.get_true_coordinates()
+
+    print("Chyba: ", np.linalg.norm(VyratSur - RealneSur))
+    print("x: {}, y: {}, z: {}".format(*[str(pt) for pt in VyratSur]))
+    print("Realne_x: {}, Realne_y: {}, Realne_z: {}".format(*[str(pt) for pt in RealneSur]))
+
+    x, y, z = [int(round(x)) for x in VyratSur]
+    Cesta = cv.circle(Cesta, (x + 400, z + 100), 1, list((0, 0, 255)), 4)
+    
+    x, y, z = [int(round(x)) for x in RealneSur]
+    Cesta = cv.circle(Cesta, (x + 400, z + 100), 1, list((0, 255, 0)), 4)
+
+    cv.imshow('Trajektoria', Cesta)
+
+cv.destroyAllWindows()
