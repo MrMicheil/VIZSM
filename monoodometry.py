@@ -14,6 +14,20 @@ class MonoOdometry(object):
         self.id = 0
         self.n_features = 0
     
+        try:
+            if not all([".png" in x for x in os.listdir(img_file_path)]):
+                raise ValueError("img_file_path is not correct and does not exclusively png files")
+        except Exception as e:
+            print(e)
+            raise ValueError("The designated img_file_path does not exist, please check the path and try again")
+
+        try:
+            with open(pose_file_path) as f:
+                self.riadok = f.readlines()
+        except Exception as e:
+            print(e)
+            raise ValueError("The pose_file_path is not valid or did not lead to a txt file")
+
         self.zmenaSnimku()
 
     def dalsiSnimok(self):
@@ -53,9 +67,9 @@ class MonoOdometry(object):
     def vyrataj_realne_suradnice(self):
         
         riadok = self.riadok[self.id - 1].strip().split()
-        x = float(riadok[3])
-        y = float(riadok[7])
-        z = float(riadok[11])
+        x = float(riadok[0])
+        y = float(riadok[1])
+        z = float(riadok[2])
 
         realne_suradnice = np.array([[x], [y], [z]])
         return realne_suradnice.flatten()
@@ -93,13 +107,13 @@ class MonoOdometry(object):
     def get_absolute_scale(self):
 
         riadok = self.riadok[self.id - 1].strip().split()
-        x_prev = float(riadok[3])
-        y_prev = float(riadok[7])
-        z_prev = float(riadok[11])
+        x_prev = float(riadok[0])
+        y_prev = float(riadok[1])
+        z_prev = float(riadok[2])
         riadok = self.riadok[self.id].strip().split()
-        x = float(riadok[3])
-        y = float(riadok[7])
-        z = float(riadok[11])
+        x = float(riadok[0])
+        y = float(riadok[1])
+        z = float(riadok[2])
 
         true_vect = np.array([[x], [y], [z]])
         prev_vect = np.array([[x_prev], [y_prev], [z_prev]])
