@@ -1,13 +1,13 @@
 import numpy as np
 import cv2 as cv
 import matplotlib.pyplot as plt
-from monovideoodometery import MonoVideoOdometery
+from monoodometery import MonoOdometery
 import os
 
 
 
-img_path = 'C:\\data_odometry_gray\\dataset\\sequences\\00\\image_0\\'
-pose_path = 'C:\\data_odometry_poses\\dataset\\poses\\00.txt'
+img_path = 'C:\\data_odometry_gray\\dataset\\sequences\\22\\image_0\\'
+pose_path = 'C:\\data_odometry_poses\\dataset\\poses\\22.txt'
 
 
 # focal = 718.8560      pp = (607.1928, 185.2157)
@@ -39,7 +39,7 @@ lk_params = dict( winSize  = (21,21),
 Odometry = MonoVideoOdometery(img_path, pose_path, focal, pp, lk_params)
 Cesta = np.zeros(shape=(600, 800, 3))
 
-while(Odometry.hasNextFrame()):
+while(Odometry.dalsiSnimok()):
 
     Snimka = Odometry.current_frame
 
@@ -47,6 +47,7 @@ while(Odometry.hasNextFrame()):
     k = cv.waitKey(1)
     if k == 27:
         break
+
 
     Odometry.process_frame()
 
