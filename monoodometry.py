@@ -13,21 +13,8 @@ class MonoOdometry(object):
         self.t = np.zeros(shape=(3, 3))
         self.id = 0
         self.n_features = 0
-    
-        try:
-            if not all([".png" in x for x in os.listdir(img_file_path)]):
-                raise ValueError("img_file_path is not correct and does not exclusively png files")
-        except Exception as e:
-            print(e)
-            raise ValueError("The designated img_file_path does not exist, please check the path and try again")
-
-        try:
-            with open(pose_file_path) as f:
-                self.riadok = f.readlines()
-        except Exception as e:
-            print(e)
-            raise ValueError("The pose_file_path is not valid or did not lead to a txt file")
-
+        with open(pose_file_path) as f:
+            self.riadok = f.readlines()
         self.zmenaSnimku()
 
     def dalsiSnimok(self):
@@ -35,11 +22,11 @@ class MonoOdometry(object):
         #    bool -- Boolean value denoting whether there are still frames in the folder to process
 
     def zmenaSnimku(self):
-
+        
         if self.id < 2:
             self.old_frame = cv2.imread(self.file_path +str().zfill(6)+'.png', 0)
             self.current_frame = cv2.imread(self.file_path + str(1).zfill(6)+'.png', 0)
-            self.odometria()
+            self.odometriaFirst()
             self.id = 2
         else:
             self.old_frame = self.current_frame
@@ -74,30 +61,39 @@ class MonoOdometry(object):
         realne_suradnice = np.array([[x], [y], [z]])
         return realne_suradnice.flatten()
 
+    def odometriaFirst(self):
 
+        self.p0 = self.detect(self.old_frame)
+        self.p1, st, err = cv2.calcOpticalFlowPyrLK(self.old_frame, self.current_frame, self.p0, None, **self.lk_params)
+        self.good_old = self.p0[st == 1]
+        self.good_new = self.p1[st == 1] 
+
+        
+        E, _ = cv2.findEssentialMat(self.good_new, self.good_old, self.focal, self.pp, cv2.RANSAC, 0.999, 1.0, None)
+        _, self.R, self.t, _ = cv2.recoverPose(E, self.good_old, self.good_new, self.R, self.t, self.focal, self.pp, None)
+        self.n_features = self.good_new.shape[0] 
+        
+   
     def odometria(self):
 
         if self.n_features < 2000:                          #
             self.p0 = self.detect(self.old_frame)
 
         self.p1, st, err = cv2.calcOpticalFlowPyrLK(self.old_frame, self.current_frame, self.p0, None, **self.lk_params)
+        print(self.p1)
         
         # Save the good points from the optical flow
         self.good_old = self.p0[st == 1]
         self.good_new = self.p1[st == 1]
 
 
-        if self.id < 2:
-            E, _ = cv2.findEssentialMat(self.good_new, self.good_old, self.focal, self.pp, cv2.RANSAC, 0.999, 1.0, None)
-            _, self.R, self.t, _ = cv2.recoverPose(E, self.good_old, self.good_new, self.R, self.t, self.focal, self.pp, None)
-        else:
-            E, _ = cv2.findEssentialMat(self.good_new, self.good_old, self.focal, self.pp, cv2.RANSAC, 0.999, 1.0, None)
-            _, R, t, _ = cv2.recoverPose(E, self.good_old, self.good_new, self.R.copy(), self.t.copy(), self.focal, self.pp, None)
+        E, _ = cv2.findEssentialMat(self.good_new, self.good_old, self.focal, self.pp, cv2.RANSAC, 0.999, 1.0, None)
+        _, R, t, _ = cv2.recoverPose(E, self.good_old, self.good_new, self.R.copy(), self.t.copy(), self.focal, self.pp, None)
 
-            absolute_scale = self.get_absolute_scale()              #read document
-            if (absolute_scale > 0.1):                              #Ak som nemal dataset dal som tam len absolute_scale = 0.2 Je to udaj napr. o rychlosti kamery
-                self.t = self.t + absolute_scale * self.R.dot(t)    
-                self.R = R.dot(self.R)
+        absolute_scale = 0.2             #read document
+        if (absolute_scale > 0.1):                              #Ak som nemal dataset dal som tam len absolute_scale = 0.2 Je to udaj napr. o rychlosti kamery
+            self.t = self.t + absolute_scale * self.R.dot(t)    
+            self.R = R.dot(self.R)
 
         self.n_features = self.good_new.shape[0]
         # Save good points

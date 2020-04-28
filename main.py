@@ -21,8 +21,12 @@ pose_path = 'C:\\data_odometry_poses\\dataset\\poses\\22.txt'
 # double cx = (newImgSize.width)*0.5;
 # double cy = (newImgSize.height)*0.5; 
 
-focal = 187.5
-pp = (600, 190)
+SenzorSize = 32
+focalInMM = 5
+width = 1200
+height = 380
+focal = focalInMM*(width/SenzorSize)
+pp = (width*0.5, height*0.5)
 
 
 # Parameters for lucas kanade optical flow
@@ -47,7 +51,6 @@ while(Odometry.dalsiSnimok()):
     k = cv.waitKey(1)
     if k == 27:
         break
-
 
     Odometry.zmenaSnimku()
 
