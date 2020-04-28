@@ -260,6 +260,6 @@ Navrhujem vymeniť ten posledný riadok v tej funkcii ... je to matematicky to i
         return np.linalg.norm(true_vect - prev_vect)
 ```
  ![Screen1](images/main.PNG)
- ![Screen2](images/VO1.png)
- ![Screen3](images/VO2.png)
- ![Screen4](images/VO3.png)
+ ![Screen2](images/VO1.PNG)
+ ![Screen3](images/VO2.PNG)
+ ![Screen4](images/VO3.PNG)
