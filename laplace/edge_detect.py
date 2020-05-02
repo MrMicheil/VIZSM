@@ -23,7 +23,7 @@ def to_gray(mat):
 
 
 def correlate(mat1, mat2):
-    return signal.correlate2d(mat1, mat2)
+    return signal.correlate2d(mat1.astype(np.float), mat2)
 
 
 def __get_safe_inds(mat, x, y, sz):
@@ -53,7 +53,7 @@ def __vals_around(mat, x, y, sz)->list:
 
 
 def __find_median(mat, x, y, sz):
-    vals = __vals_around(x, y, sz)
+    vals = __vals_around(mat, x, y, sz)
     return np.median(vals)
 
 
@@ -61,7 +61,7 @@ def __find_median(mat, x, y, sz):
 def median_filter(mat, size):
     if(size % 2 == 0):
         raise ValueError("size shouldn't be even")
-    cpy = np.empty(mat.shape)
+    cpy = np.empty(mat.shape, np.uint8)
     w, h = mat.shape
 
     for i in range(0, w):
@@ -71,11 +71,11 @@ def median_filter(mat, size):
     return cpy
 
 
-def averageFilter(size):
+def averageFilter(mat, size):
     if(size % 2 == 0):
         raise ValueError("size shouldn't be even")
-    mat = np.full((size, size), 1/(size*size), np.float)
-    return correlate(mat).astype(np.uint8)
+    mat2 = np.full((size, size), 1/(size*size), np.float)
+    return correlate(mat, mat2).astype(np.uint8)
 
 
 def laplacian(mat):
@@ -91,14 +91,14 @@ def laplacian(mat):
     
     
 
-def set_min_max(mat):
+def set_min_max(mat, min=0, max=255):
     mat2 = np.empty(mat.shape, np.uint8)
     for i in range(0, mat.shape[0]):
         for j in range(0, mat.shape[1]):
-            if mat[i,j] < 0:
-                mat2[i, j] = 0
-            elif mat[i, j] > 255:
-                mat2[i, j] = 255
+            if mat[i,j] < min:
+                mat2[i, j] = min
+            elif mat[i, j] > max:
+                mat2[i, j] = max
             else:
                 mat2[i, j] = mat[i, j]
     return mat2
@@ -107,10 +107,8 @@ def __calc_mf(mat, x, y, sz):
     x_safe, y_safe = __get_safe_inds(mat, x, y, sz)
 
     coeff = 1/((2*sz + 1)**2)
-    sum = 0
-    for k1 in range(x_safe[0], x_safe[1]+1):
-        for k2 in range(y_safe[0], y_safe[1] + 1):
-            sum += mat[k1, k2]
+    slc = mat[x_safe[0]:x_safe[1]+1, y_safe[0]:y_safe[1]+1]
+    sum = np.sum(slc)
     return coeff*sum
 
 
@@ -136,27 +134,24 @@ def __check_ZC(mat, x, y):
     #diag2
     if(mat[x-1, y+1]*mat[x+1, y-1] < 0):
         return True
-    #vertical
-    if(mat[x, y-1]*mat[x, y+1] < 0):
-        return True
     return False
 
 
 def find_zero_cross(mat):
     edges = np.zeros(mat.shape, np.uint8)
+    stdev = np.zeros(mat.shape, np.float)
     w, h = mat.shape
     for i in range(1, w - 1, 1):
         for j in range(1, h - 1, 1):
             if(__check_ZC(mat, i, j)):
-                #dev = self.__calc_deviation(i, j, 5)
-                #if(dev > 5000):
+                stdev[i,j] = __calc_deviation(mat, i, j, 5)
                 edges[i,j] = 1
         print(i)
     
-    return edges
+    return (edges, stdev)
             
             
 
 
 def print_to_file(mat, filename):
-    Image.fromarray(mat).save(filename)
+    Image.fromarray(mat.astype(np.uint8)).save(filename)
