@@ -2,17 +2,19 @@ import os, sys
 from PIL import Image
 import numpy as np
 import matplotlib.pyplot as plt
-from edge_detect import EdgeDetect
+import edge_detect as ed
 from scipy import signal
 
 
+infile = 'resources/simp.png'
 
-infile = 'resources/face.png'
-detect = EdgeDetect(infile)
-# detect.averageFilter(15)
-print('Filt done..')
-detect.laplacian()
-print('laplacian done..')
-detect.find_zero_cross()
+im = Image.open(infile)
+arr = np.array(im)
+gray = ed.to_gray(arr)
 
-detect.print_to_file('output/face.png')
+lap = ed.laplacian(gray)
+norm = ed.set_min_max(lap)
+zc = ed.find_zero_cross(lap)
+zc *= 255
+ed.print_to_file(zc, 'output/gray.png')
+ed.print_to_file(norm, 'output/norm.png')
