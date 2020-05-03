@@ -6,11 +6,11 @@ import os
 
 
 
-img_path = 'C:\\data_odometry_gray\\dataset\\sequences\\22\\image_0\\'
-pose_path = 'C:\\data_odometry_poses\\dataset\\poses\\22.txt'
+img_path = 'C:\\data_odometry_gray\\dataset\\sequences\\25\\image_0\\'
+pose_path = 'C:\\data_odometry_poses\\dataset\\poses\\00.txt'
 
 
-# focal = 718.8560      pp = (607.1928, 185.2157)
+
 # focal V5, V7, V9, V11, V13 = 187.5      V6, V8, V10 = 375
 
 #                                                                                       35/10/5   1200      32       375   
@@ -21,12 +21,14 @@ pose_path = 'C:\\data_odometry_poses\\dataset\\poses\\22.txt'
 # double cx = (newImgSize.width)*0.5;
 # double cy = (newImgSize.height)*0.5; 
 
+
 SenzorSize = 32
-focalInMM = 5
+focalInMM = 10
 width = 1200
 height = 380
 focal = focalInMM*(width/SenzorSize)
 pp = (width*0.5, height*0.5)
+# focal = 718.8560      pp = (607.1928, 185.2157)        dataset 00
 
 
 # Parameters for lucas kanade optical flow
@@ -57,15 +59,15 @@ while(Odometry.dalsiSnimok()):
     VyratSur = Odometry.vyrataj_suradnice()
     RealneSur = Odometry.vyrataj_realne_suradnice()
 
-    print("Chyba: ", np.linalg.norm(VyratSur - RealneSur))
+    #print("Chyba: ", np.linalg.norm(VyratSur - RealneSur))
     print("x: {}, y: {}, z: {}".format(*[str(pt) for pt in VyratSur]))
     print("Realne_x: {}, Realne_y: {}, Realne_z: {}".format(*[str(pt) for pt in RealneSur]))
  
     x, y, z = [int(round(x)) for x in VyratSur]
-    Cesta = cv.circle(Cesta, (x * 4 + 400, z * 4 + 100), 1, list((0, 0, 255)), 4)
+    Cesta = cv.circle(Cesta, (x * 3 + 400, z + 100), 1, list((0, 0, 255)), 4)
     
     x, y, z = [int(round(x)) for x in RealneSur]
-    Cesta = cv.circle(Cesta, (x * 4 + 400, z * 4 + 100), 1, list((0, 255, 0)), 4)
+    Cesta = cv.circle(Cesta, (x * 3 + 400, z + 100), 1, list((0, 255, 0)), 4)
 
     cv.imshow('Trajektoria', Cesta)
 

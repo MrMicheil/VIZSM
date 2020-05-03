@@ -54,9 +54,9 @@ class MonoOdometry(object):
     def vyrataj_realne_suradnice(self):
         
         riadok = self.riadok[self.id - 1].strip().split()
-        x = float(riadok[0])
-        y = float(riadok[1])
-        z = float(riadok[2])
+        x = float(riadok[0])    #[3]
+        y = float(riadok[1])    #[7]
+        z = float(riadok[2])   #[11]
 
         realne_suradnice = np.array([[x], [y], [z]])
         return realne_suradnice.flatten()
@@ -80,7 +80,6 @@ class MonoOdometry(object):
             self.p0 = self.detect(self.old_frame)
 
         self.p1, st, err = cv2.calcOpticalFlowPyrLK(self.old_frame, self.current_frame, self.p0, None, **self.lk_params)
-        print(self.p1)
         
         # Save the good points from the optical flow
         self.good_old = self.p0[st == 1]
@@ -89,9 +88,12 @@ class MonoOdometry(object):
 
         E, _ = cv2.findEssentialMat(self.good_new, self.good_old, self.focal, self.pp, cv2.RANSAC, 0.999, 1.0, None)
         _, R, t, _ = cv2.recoverPose(E, self.good_old, self.good_new, self.R.copy(), self.t.copy(), self.focal, self.pp, None)
+        print(t)
 
-        absolute_scale = 0.2             #read document
-        if (absolute_scale > 0.1):                              #Ak som nemal dataset dal som tam len absolute_scale = 0.2 Je to udaj napr. o rychlosti kamery
+
+        #absolute_scale = self.get_absolute_scale() 
+        absolute_scale = 0.4            #read document
+        if (absolute_scale > 0.1 and abs(t[2][0]) > abs(t[0][0]) and abs(t[2][0]) > abs(t[1][0])):  #Ak som nemal dataset dal som tam len absolute_scale = 0.2 Je to udaj napr. o rychlosti kamery
             self.t = self.t + absolute_scale * self.R.dot(t)    
             self.R = R.dot(self.R)
 
@@ -103,13 +105,13 @@ class MonoOdometry(object):
     def get_absolute_scale(self):
 
         riadok = self.riadok[self.id - 1].strip().split()
-        x_prev = float(riadok[0])
-        y_prev = float(riadok[1])
-        z_prev = float(riadok[2])
+        x_prev = float(riadok[0])   #[3]
+        y_prev = float(riadok[1])   #[7]
+        z_prev = float(riadok[2])  #[11]
         riadok = self.riadok[self.id].strip().split()
-        x = float(riadok[0])
-        y = float(riadok[1])
-        z = float(riadok[2])
+        x = float(riadok[0])        #[3]
+        y = float(riadok[1])        #[7]
+        z = float(riadok[2])        #[11]
 
         true_vect = np.array([[x], [y], [z]])
         prev_vect = np.array([[x_prev], [y_prev], [z_prev]])
