@@ -12,7 +12,10 @@ def __sign(num):
         return 0
 
 
-  
+
+def load_file(path):
+    return np.array(Image.open(path), np.uint8)
+
 
 def to_gray(mat):
     ret = np.empty(mat.shape[0:2], np.uint8)
