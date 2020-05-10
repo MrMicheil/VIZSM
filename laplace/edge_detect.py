@@ -26,7 +26,37 @@ def to_gray(mat):
 
 
 def correlate(mat1, mat2):
+    # return _correlate(mat1, mat2)
     return signal.correlate2d(mat1.astype(np.float), mat2)
+
+
+def __ind_valid(x, y, sz):
+    if(x < 0 or y < 0):
+        return False
+    if(x >= sz[0] or y >= sz[1]):
+        return False
+    return True
+
+def __correlate_here(x, y, mat1, mat2):
+    pm = int(mat2.shape[0]/2)
+    sum_ = 0
+    for i in range(-pm, pm+1):
+        for j in range(-pm, pm+1):
+            if(__ind_valid(x+i, y+j, mat1.shape)):
+                sum_ += mat1[x+i, y+j] * mat2[i+pm, j+pm]
+    
+    return sum_
+
+
+def _correlate(mat1, mat2):
+    sz = mat1.shape
+    ret = np.zeros(mat1.shape, np.float)
+    for i in range(0, sz[0]):
+        for j in range(0, sz[1]):
+            ret[i, j] = __correlate_here(i, j, mat1, mat2)
+    
+    return ret
+            
 
 
 def __get_safe_inds(mat, x, y, sz):
