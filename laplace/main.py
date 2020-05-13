@@ -2,7 +2,7 @@ import os, sys
 from PIL import Image
 import numpy as np
 import matplotlib.pyplot as plt
-import edge_detect as ed
+import edge_detect.edge_detect as ed
 from scipy import signal
 
 # config
