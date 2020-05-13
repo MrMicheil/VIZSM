@@ -47,7 +47,7 @@ while(Odometry.dalsiSnimok()):
     RealneSur = Odometry.vyrataj_realne_suradnice()
 
     #Vypis do terminalu
-    print("x: {}, y: {}, z: {}".format(*[str(pt) for pt in VyratSur]))
+    print("x: {}, z: {}, y: {}".format(*[str(pt) for pt in VyratSur]))
     #Vypis na obrazovku
     x, y, z = [int((x)) for x in VyratSur]
     Cesta = cv.circle(Cesta, (x * 3 + 400, z * 3 + 100), 1, list((0, 255, 0)), 4)
