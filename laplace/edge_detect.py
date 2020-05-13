@@ -3,17 +3,7 @@ import numpy as np
 from scipy import signal
 
 
-def __sign(num):
-    if(num > 0):
-        return 1
-    elif(num < 0):
-        return -1
-    else:
-        return 0
-
-
-
-def load_file(path):
+def load_image(path):
     return np.array(Image.open(path), np.uint8)
 
 
@@ -25,8 +15,8 @@ def to_gray(mat):
     return ret
 
 
-def correlate(mat1, mat2):
-    # return _correlate(mat1, mat2)
+def convolute(mat1, mat2):
+    # return _convolute(mat1, mat2)
     return signal.correlate2d(mat1.astype(np.float), mat2)
 
 
@@ -37,7 +27,7 @@ def __ind_valid(x, y, sz):
         return False
     return True
 
-def __correlate_here(x, y, mat1, mat2):
+def __convolute_here(x, y, mat1, mat2):
     pm = int(mat2.shape[0]/2)
     sum_ = 0
     for i in range(-pm, pm+1):
@@ -48,12 +38,12 @@ def __correlate_here(x, y, mat1, mat2):
     return sum_
 
 
-def _correlate(mat1, mat2):
+def _convolute(mat1, mat2):
     sz = mat1.shape
     ret = np.zeros(mat1.shape, np.float)
     for i in range(0, sz[0]):
         for j in range(0, sz[1]):
-            ret[i, j] = __correlate_here(i, j, mat1, mat2)
+            ret[i, j] = __convolute_here(i, j, mat1, mat2)
     
     return ret
             
@@ -108,7 +98,7 @@ def averageFilter(mat, size):
     if(size % 2 == 0):
         raise ValueError("size shouldn't be even")
     mat2 = np.full((size, size), 1/(size*size), np.float)
-    return correlate(mat, mat2).astype(np.uint8)
+    return convolute(mat, mat2).astype(np.uint8)
 
 
 def laplacian(mat):
@@ -118,7 +108,7 @@ def laplacian(mat):
     mat2 = np.array([[1, 1, 1],
             [1, -8, 1],
             [1, 1, 1]])
-    laplace = correlate(mat, mat1)
+    laplace = convolute(mat, mat1)
 
     return laplace
     

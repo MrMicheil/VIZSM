@@ -12,7 +12,7 @@ min_max_amp = 5
 
 infile = 'resources/face.png'
 
-rgb = ed.load_file(infile)
+rgb = ed.load_image(infile)
 gray = ed.to_gray(rgb)
 gray = ed.averageFilter(gray, 5)
 gray = ed.median_filter(gray, 3)
